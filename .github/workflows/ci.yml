@@ -29,6 +29,7 @@ jobs:
         run: pip install ruff
 
       - name: Run Ruff
+        working-directory: Task-2-Dockerize-Python-WebServer
         run: ruff check app.py --output-format=full
 
   test:
