@@ -62,7 +62,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t myapp:test .
+        run: docker build -t myapp:test ./Task-2-Dockerize-Python-WebServer
 
   trivy:
     name: Trivy Image Scan
