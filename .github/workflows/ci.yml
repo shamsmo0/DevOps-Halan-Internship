@@ -28,7 +28,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Ruff
-        run: pip install ruff
+        run: pip install ruff==0.16.2
 
       - name: Run Ruff
         run: ruff check . --output-format=full
