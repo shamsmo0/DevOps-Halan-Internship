@@ -13,6 +13,11 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Task-2-Dockerize-Python-WebServer
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,18 +28,19 @@ jobs:
           python-version: "3.12"
 
       - name: Install Ruff
-        run: pip install ruff
+        run: pip install ruff==0.16.2
 
       - name: Run Ruff
-        run: ruff check .
+        run: ruff check . --output-format=full
 
   test:
     name: Test
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: Task-2-Dockerize-Python-WebServer
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,25 +62,26 @@ jobs:
     needs:
       - lint
       - test
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t myapp:test .
+        run: docker build -t myapp:test ./Task-2-Dockerize-Python-WebServer
 
   trivy:
     name: Trivy Image Scan
     runs-on: ubuntu-latest
     needs:
       - build
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t myapp:test .
+        run: docker build -t myapp:test ./Task-2-Dockerize-Python-WebServer
 
       - name: Scan image
         uses: aquasecurity/trivy-action@master
@@ -90,12 +97,13 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - trivy
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t myapp:test .
+        run: docker build -t myapp:test ./Task-2-Dockerize-Python-WebServer
 
       - name: Run container
         run: docker run -d --name myapp -p 5000:5000 myapp:test
@@ -113,4 +121,3 @@ jobs:
       - name: Remove container
         if: always()
         run: docker rm myapp
-
