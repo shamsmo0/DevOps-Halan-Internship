@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: StatefulSet
+
+metadata:
+  name: {{ include "flask-postgres.fullname" . }}-postgres
+
+spec:
+  serviceName: {{ include "flask-postgres.fullname" . }}
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: {{ include "flask-postgres.fullname" . }}-postgres
+
+  template:
+    metadata:
+      labels:
+        app: {{ include "flask-postgres.fullname" . }}-postgres
+
+    spec:
+      containers:
+        - name: postgres
+
+          image: {{ .Values.postgres.image }}
+
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.postgres.database | quote }}
+
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.username | quote }}
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "flask-postgres.fullname" . }}-postgres
+                  key: postgres-password
+
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+      volumes:
+        - name: postgres-storage
+
+          persistentVolumeClaim:
+            claimName: {{ include "flask-postgres.fullname" . }}-postgres

@@ -1,0 +1,21 @@
+# RKE sensitive files
+rke-cluster/kube_config_cluster.yml
+rke-cluster/cluster.rkestate
+
+# SSH private keys
+*.pem
+*.key
+id_rsa
+id_rsa.*
+
+# Terraform / environment secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
