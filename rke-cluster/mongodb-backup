@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-logs-backup
+  namespace: sun
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+
+          containers:
+            - name: backup
+              image: bitnami/mongodb:latest
+
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+
+                  DATE=$(date +%Y%m%d-%H%M%S)
+
+                  echo "Starting MongoDB logs backup: $DATE"
+
+                  mkdir -p /backup
+
+                  tar -czf "/backup/mongodb-logs-${DATE}.tar.gz" \
+                    -C /mongodb-logs .
+
+                  echo "Backup completed:"
+                  ls -lh /backup
+
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+
+                - name: mongodb-logs
+                  mountPath: /mongodb-logs
+                  readOnly: true
+
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: mongodb-backup-pvc
+
+            - name: mongodb-logs
+              hostPath:
+                path: /tmp/mongodb-logs
+                type: DirectoryOrCreate

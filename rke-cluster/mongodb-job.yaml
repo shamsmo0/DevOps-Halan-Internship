@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongodb-test-job
+  namespace: sun
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: test
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Job started"
+              echo "MongoDB test job is running"
+              sleep 10
+              echo "Job completed successfully"

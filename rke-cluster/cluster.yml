@@ -1,0 +1,10 @@
+nodes:
+  - address: 10.0.11.98
+    internal_address: 10.0.11.98
+    user: shams
+    role:
+      - controlplane
+      - worker
+      - etcd
+
+kubernetes_version: "v1.30.14-rancher1-1"
